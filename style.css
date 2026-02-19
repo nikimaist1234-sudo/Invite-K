@@ -1,0 +1,561 @@
+/* ---------------- RESET ---------------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+html, body {
+    height: 100%;
+    background: black;
+}
+
+/* ---------------- PAGE SYSTEM (Initial: Smooth Transitions) ---------------- */
+.page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-height: 100vh;
+    padding: 40px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transform: scale(1.02);
+    transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+}
+
+.page.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: scale(1);
+    z-index: 2;
+}
+
+/* ---------------- PAGE 0 (Volume) ---------------- */
+.volume-page {
+    background: url("weeknd-music.jpg") no-repeat center center/cover;
+    color: white;
+}
+
+.volume-overlay h2{
+    margin-top: 10px;
+    opacity: 0.95;
+}
+
+/* ---------------- PAGE 1 ---------------- */
+#page1 {
+    background: url("weeknd-bg.jpg") no-repeat center center/cover;
+    color: white;
+}
+
+.overlay {
+    background: rgba(0,0,0,0.6);
+    padding: 40px;
+    border-radius: 15px;
+    text-align: center;
+    width: min(720px, 92vw);
+}
+
+.big-title {
+    font-size: 5rem;
+    margin-bottom: 10px;
+}
+
+/* ---------------- BALLOON GAME ---------------- */
+.balloon-area{
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: center;
+}
+
+.balloon-hint{
+    font-size: 1.6rem;
+    opacity: 0.95;
+}
+
+.balloon-container{
+    position: relative;
+    width: min(560px, 92vw);
+    height: 360px;
+    max-height: 46vh;
+}
+
+.balloon-piece{
+    position: absolute;
+    width: 68px;
+    height: 86px;
+    border-radius: 50% 50% 45% 45%;
+    cursor: pointer;
+    user-select: none;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 12px 26px rgba(0,0,0,0.28);
+    animation: float 2.4s infinite ease-in-out;
+}
+
+.balloon-piece::before{
+    content: "";
+    position: absolute;
+    top: 14px;
+    left: 16px;
+    width: 12px;
+    height: 26px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.22);
+    transform: rotate(-18deg);
+}
+
+.balloon-piece::after{
+    content: "";
+    position: absolute;
+    bottom: -22px;
+    left: 50%;
+    width: 2px;
+    height: 24px;
+    background: rgba(255,255,255,0.45);
+    transform: translateX(-50%);
+}
+
+.balloon-piece.white{ background: #f2f2f2; }
+.balloon-piece.black{ background: #0f0f0f; }
+
+.balloon-piece.popped{
+    animation: pop 180ms ease-out forwards;
+}
+
+@keyframes float {
+    0% { transform: translate(-50%, -50%) translateY(0); }
+    50% { transform: translate(-50%, -50%) translateY(-10px); }
+    100% { transform: translate(-50%, -50%) translateY(0); }
+}
+
+@keyframes pop{
+    to{
+        transform: translate(-50%, -50%) scale(1.35);
+        opacity: 0;
+    }
+}
+
+/* ---------------- XO CONFETTI ---------------- */
+#xoConfettiLayer{
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: 9999;
+}
+
+.xo-piece{
+    position: absolute;
+    top: -20px;
+    font-weight: 800;
+    font-size: 16px;
+    opacity: 0.96;
+    will-change: transform;
+    animation: xoFall linear forwards;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.15);
+}
+
+@keyframes xoFall{
+    to{
+        transform: translate(var(--drift), 110vh) rotate(var(--rot));
+        opacity: 1;
+    }
+}
+
+/* ---------------- LIGHT PAGES ---------------- */
+.light-page {
+    background-color: #e5e5e5;
+    color: black;
+}
+
+/* ---------------- TWO COLUMN LAYOUT ---------------- */
+.two-column {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 30px;
+}
+
+.two-column .left,
+.two-column .right {
+    width: 45%;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.two-column img {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.big-line {
+    font-size: 1.3rem;
+    margin-top: 12px;
+}
+
+/* ---------------- PAGE 3 SPECIFIC ---------------- */
+.highlight-box {
+    background-color: #d6d6d6;
+    padding: 10px 15px;
+    border-radius: 5px;
+    display: inline-block;
+    margin: 10px 0 14px;
+}
+
+.dress-list {
+    padding-left: 20px;
+}
+
+.dress-list li {
+    margin-bottom: 8px;
+}
+
+/* ---------------- CONTACT PAGE ---------------- */
+.big-contact {
+    font-size: 3rem;
+}
+
+/* ---------------- BUTTONS ---------------- */
+button {
+    margin-top: 18px;
+    padding: 10px 20px;
+    border: none;
+    background: black;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s ease;
+    border-radius: 10px;
+}
+
+button:hover { background: #333; }
+
+button.primary{
+    background: #ffffff;
+    color: #111;
+}
+button.primary:hover{
+    background: #e9e9e9;
+}
+
+/* ---------------- FOOTER ---------------- */
+.dark-footer {
+    width: 100%;
+    background: black;
+    color: white;
+    padding: 15px 0;
+    text-align: center;
+    font-weight: bold;
+    font-size: 2rem;
+    font-family: Rockwell, "Times New Roman", serif;
+    margin-top: 30px;
+}
+
+/* ---------------- SCROLL MODE (Page 2 -> end) ---------------- */
+body.locked{
+    height: 100vh;
+    overflow: hidden;
+}
+
+body.scroll-mode{
+    background: #e5e5e5;
+    overflow-y: auto;
+}
+
+/* When scroll mode is on:
+   - hide the intro pages
+   - stack pages 2-4 normally and make them visible */
+body.scroll-mode #page0,
+body.scroll-mode #page1{
+    display: none;
+}
+
+body.scroll-mode .page{
+    position: relative;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: none;
+    transition: none;
+    padding: 40px;
+}
+
+body.scroll-mode #page2,
+body.scroll-mode #page3,
+body.scroll-mode #page4{
+    display: flex;
+}
+
+body.scroll-mode #page4{
+    padding-bottom: 0;
+}
+
+/* ---------------- MOBILE RESPONSIVE ---------------- */
+@media (max-width: 768px) {
+
+    .page {
+        padding: 20px;
+        min-height: 100vh;
+    }
+
+    .overlay{
+        padding: 26px;
+    }
+
+    .big-title {
+        font-size: 2.4rem;
+    }
+
+    .balloon-hint{
+        font-size: 1.2rem;
+    }
+
+    .balloon-container{
+        height: 320px;
+        max-height: 44vh;
+    }
+
+    .two-column {
+        flex-direction: column;
+        gap: 22px;
+    }
+
+    .two-column .left,
+    .two-column .right {
+        width: 100%;
+    }
+
+    h1 { font-size: 1.3rem; }
+    h2 { font-size: 1.1rem; }
+    h3 { font-size: 2rem; }
+}
+
+
+/* ---------------- KISSLAND NEON FLOOD ---------------- */
+#neonFlood{
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9998;
+
+    /* default: hidden */
+    opacity: 0;
+
+    /* JS sets these so the flood blooms from the last tapped window */
+    --origin-x: 50%;
+    --origin-y: 50%;
+    --center-x: 50%;
+    --center-y: 50%;
+
+    background: radial-gradient(circle at var(--center-x) var(--center-y),
+        rgba(0,255,127,0.95) 0%,
+        rgba(0,255,127,0.75) 18%,
+        rgba(0,255,127,0.25) 45%,
+        rgba(0,255,127,0.0) 70%);
+
+    transform-origin: var(--origin-x) var(--origin-y);
+    transform: scale(0.05);
+    filter: blur(6px);
+}
+
+#neonFlood.flooding{
+    animation: neonFloodSpread 1100ms ease-out forwards;
+}
+
+@keyframes neonFloodSpread{
+    0%{
+        opacity: 0;
+        transform: scale(0.05);
+        filter: blur(10px);
+    }
+    12%{
+        opacity: 1;
+    }
+    70%{
+        opacity: 1;
+        transform: scale(2.8);
+        filter: blur(1px);
+    }
+    100%{
+        opacity: 0;
+        transform: scale(3.4);
+        filter: blur(0px);
+    }
+}
+
+
+/* ================= CITYSCAPE GAME ================= */
+
+.city-area{
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+}
+
+.city-hint{
+    font-size: 1.3rem;
+    color: #aaffcc;
+}
+
+.city-container{
+    position: relative;
+    width: min(640px, 95vw);
+    height: 380px;
+    background: url("assets/weeknd-bg.jpg") no-repeat center center/cover;
+    border-radius: 10px;
+    filter: blur(3.5px) brightness(0.7) contrast(1.08) saturate(1.05);
+    overflow: hidden;
+    transition: all 0.8s ease;
+}
+
+/* Skyline silhouette overlay */
+.city-container::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+
+    background:
+        linear-gradient(to top, rgba(0,0,0,0.85) 0 35%, transparent 35%),
+        linear-gradient(to top, rgba(0,0,0,0.9) 0 60%, transparent 60%) 8% 100% / 10% 80% no-repeat,
+        linear-gradient(to top, rgba(0,0,0,0.9) 0 45%, transparent 45%) 22% 100% / 8% 65% no-repeat,
+        linear-gradient(to top, rgba(0,0,0,0.9) 0 70%, transparent 70%) 40% 100% / 14% 90% no-repeat,
+        linear-gradient(to top, rgba(0,0,0,0.9) 0 55%, transparent 55%) 60% 100% / 12% 75% no-repeat,
+        linear-gradient(to top, rgba(0,0,0,0.9) 0 65%, transparent 65%) 78% 100% / 9% 85% no-repeat;
+
+    opacity: 0.92;
+    mix-blend-mode: normal;
+    filter: drop-shadow(0 0 10px rgba(0,255,127,0.18));
+}
+
+/* subtle glow */
+.city-container::after{
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: radial-gradient(circle at center,
+        rgba(0,255,127,0.1),
+        transparent 70%);
+    animation: cityPulse 2.5s infinite ease-in-out;
+}
+
+@keyframes cityPulse{
+    0%{ opacity: 0.3; }
+    50%{ opacity: 0.7; }
+    100%{ opacity: 0.3; }
+}
+
+.window-light{
+    position: absolute;
+    z-index: 3;
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+
+    /* More visible “glowing” targets */
+    background: rgba(0,255,127,0.22);
+    border: 1px solid rgba(170,255,204,0.55);
+    box-shadow:
+        0 0 10px rgba(0,255,127,0.35),
+        0 0 22px rgba(0,255,127,0.22);
+
+    transition: transform 180ms ease, background 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+    animation: windowPulse 1.7s ease-in-out infinite;
+}
+
+.city-container.game-ready .window-light{
+    box-shadow:
+        0 0 14px rgba(0,255,127,0.42),
+        0 0 30px rgba(0,255,127,0.26);
+}
+
+.window-light:hover{
+    transform: scale(1.08);
+    border-color: rgba(220,255,240,0.75);
+    box-shadow:
+        0 0 18px rgba(0,255,127,0.55),
+        0 0 42px rgba(0,255,127,0.28);
+}
+
+@keyframes windowPulse{
+    0%   { transform: scale(1);    opacity: 0.85; }
+    50%  { transform: scale(1.06); opacity: 1; }
+    100% { transform: scale(1);    opacity: 0.88; }
+}
+
+.window-light.lit{
+    background: #00ff7f;
+    box-shadow:
+        0 0 14px rgba(0,255,127,0.85),
+        0 0 32px rgba(0,255,127,0.65),
+        0 0 56px rgba(0,255,127,0.35);
+}
+
+.city-container.emerald{
+    filter: blur(0px) brightness(1);
+    box-shadow:
+        0 0 55px rgba(0,255,127,0.75),
+        0 0 110px rgba(0,255,127,0.55);
+}
+
+.city-container.zooming{
+    transition: transform 850ms ease, filter 850ms ease;
+    transform: scale(1.55);
+    filter: blur(1px) brightness(0.95);
+}
+
+/* Emerald ripple */
+.emerald-ripple{
+    position: absolute;
+    z-index: 4;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    transform: translate(-50%, -50%) scale(0.2);
+    opacity: 0;
+    pointer-events: none;
+    background: radial-gradient(circle,
+        rgba(0,255,127,0.6) 0%,
+        rgba(0,255,127,0.3) 35%,
+        rgba(0,255,127,0.0) 70%);
+}
+
+.emerald-ripple.go{
+    animation: emeraldRipple 820ms ease-out forwards;
+}
+
+@keyframes emeraldRipple{
+    0%{
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.25);
+    }
+    15%{
+        opacity: 1;
+    }
+    100%{
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(18);
+    }
+}
+
