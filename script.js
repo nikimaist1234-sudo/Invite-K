@@ -2,20 +2,34 @@ document.addEventListener("DOMContentLoaded", () => {
   const startBtn = document.getElementById("startBtn");
   const music = document.getElementById("bgMusic");
 
-  let unlocked = false;
-  let litCount = 0;
-  let lastTap = { x: 50, y: 50 };
+  // Memory Game Variables
+  let hasFlippedCard = false;
+  let lockBoard = false;
+  let firstCard, secondCard;
+  let matchedPairs = 0;
+  const totalPairs = 4;
+  let gameComplete = false;
 
-  const REQUIRED_WINDOWS = 10;
-
-  const BUILDING_ZONES = [
-    { xMin: 6,  xMax: 18, yMin: 42, yMax: 76 },
-    { xMin: 20, xMax: 30, yMin: 38, yMax: 74 },
-    { xMin: 32, xMax: 46, yMin: 35, yMax: 78 },
-    { xMin: 48, xMax: 62, yMin: 40, yMax: 80 },
-    { xMin: 64, xMax: 76, yMin: 36, yMax: 78 },
-    { xMin: 78, xMax: 92, yMin: 42, yMax: 76 },
+  // Card symbols (emojis representing the themes)
+  const cardSymbols = [
+    { id: 1, symbol: '🐱', name: 'neon-cat', lyric: 'Adapted' },
+    { id: 2, symbol: '🐱', name: 'neon-cat', lyric: 'Adapted' },
+    { id: 3, symbol: '🏮', name: 'lantern', lyric: 'to' },
+    { id: 4, symbol: '🏮', name: 'lantern', lyric: 'to' },
+    { id: 5, symbol: '🌆', name: 'tokyo', lyric: 'these' },
+    { id: 6, symbol: '🌆', name: 'tokyo', lyric: 'these' },
+    { id: 7, symbol: '✖️⭕', name: 'xo', lyric: 'models' },
+    { id: 8, symbol: '✖️⭕', name: 'xo', lyric: 'models' }
   ];
+
+  // Shuffle array
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
 
   function showOnlyPage(pageNumber){
     document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
@@ -39,128 +53,230 @@ document.addEventListener("DOMContentLoaded", () => {
   startBtn?.addEventListener("click", () => {
     showOnlyPage(1);
     startMusic();
-    setupCityGame();
+    initMemoryGame();
   });
 
-  /* ================= CITY GAME ================= */
+  /* ================= MEMORY MATCH GAME ================= */
 
-  function setupCityGame(){
-    const container = document.getElementById("cityContainer");
+  function initMemoryGame() {
+    const grid = document.getElementById('memoryGrid');
+    const lyricReveal = document.getElementById('lyricReveal');
+    const finalMessage = document.getElementById('finalMessage');
+    
+    if (!grid) return;
+
+    // Reset game state
+    hasFlippedCard = false;
+    lockBoard = false;
+    firstCard = null;
+    secondCard = null;
+    matchedPairs = 0;
+    gameComplete = false;
+
+    // Clear grid and lyric reveal
+    grid.innerHTML = '';
+    lyricReveal.innerHTML = '';
+    finalMessage.classList.remove('show');
+
+    // Create placeholder slots for lyrics
+    const lyricWords = ['Adapted', 'to', 'these', 'models'];
+    lyricWords.forEach((word, index) => {
+      const wordSpan = document.createElement('span');
+      wordSpan.className = 'lyric-word';
+      wordSpan.id = `lyric-${index}`;
+      wordSpan.textContent = '___';
+      lyricReveal.appendChild(wordSpan);
+    });
+
+    // Shuffle and create cards
+    const shuffledCards = shuffle([...cardSymbols]);
+    
+    shuffledCards.forEach((cardData, index) => {
+      const card = createCard(cardData, index);
+      grid.appendChild(card);
+    });
+  }
+
+  function createCard(cardData, index) {
+    const card = document.createElement('div');
+    card.className = 'memory-card';
+    card.dataset.symbol = cardData.symbol;
+    card.dataset.name = cardData.name;
+    card.dataset.lyric = cardData.lyric;
+    card.dataset.id = cardData.id;
+
+    card.innerHTML = `
+      <div class="memory-card-inner">
+        <div class="memory-card-front">
+          <span class="card-symbol">✖️⭕</span>
+        </div>
+        <div class="memory-card-back">
+          <span class="card-symbol">${cardData.symbol}</span>
+        </div>
+      </div>
+    `;
+
+    card.addEventListener('click', flipCard);
+    return card;
+  }
+
+  function flipCard() {
+    if (lockBoard) return;
+    if (this === firstCard) return;
+    if (this.classList.contains('matched')) return;
+    if (gameComplete) return;
+
+    this.classList.add('flipped');
+
+    if (!hasFlippedCard) {
+      // First card flipped
+      hasFlippedCard = true;
+      firstCard = this;
+      return;
+    }
+
+    // Second card flipped
+    secondCard = this;
+    checkForMatch();
+  }
+
+  function checkForMatch() {
+    let isMatch = firstCard.dataset.name === secondCard.dataset.name;
+
+    if (isMatch) {
+      disableCards();
+    } else {
+      unflipCards();
+    }
+  }
+
+  function disableCards() {
+    lockBoard = true;
+
+    setTimeout(() => {
+      firstCard.classList.add('matched');
+      secondCard.classList.add('matched');
+      
+      // Reveal lyric word
+      revealLyric(firstCard.dataset.lyric);
+      
+      matchedPairs++;
+      
+      resetBoard();
+
+      if (matchedPairs === totalPairs) {
+        setTimeout(() => {
+          completeGame();
+        }, 800);
+      }
+    }, 600);
+  }
+
+  function revealLyric(word) {
+    const lyricMap = {
+      'Adapted': 0,
+      'to': 1,
+      'these': 2,
+      'models': 3
+    };
+
+    const index = lyricMap[word];
+    const lyricElement = document.getElementById(`lyric-${index}`);
+    if (lyricElement) {
+      lyricElement.textContent = word;
+      lyricElement.classList.add('revealed');
+    }
+  }
+
+  function unflipCards() {
+    lockBoard = true;
+    setTimeout(() => {
+      firstCard.classList.remove('flipped');
+      secondCard.classList.remove('flipped');
+      resetBoard();
+    }, 1000);
+  }
+
+  function resetBoard() {
+    [hasFlippedCard, lockBoard] = [false, false];
+    [firstCard, secondCard] = [null, null];
+  }
+
+  function completeGame() {
+    gameComplete = true;
+    
+    // Show final message
+    const finalMessage = document.getElementById('finalMessage');
+    finalMessage.classList.add('show');
+
+    // Start XO rain after a short delay
+    setTimeout(() => {
+      startXORain();
+    }, 1000);
+  }
+
+  function startXORain() {
+    const container = document.getElementById('xoRainContainer');
     if (!container) return;
 
-    container.innerHTML = "";
-    litCount = 0;
-    unlocked = false;
+    container.classList.add('active');
+    
+    const colors = ['#00ff7f', '#00cc66', '#00994d', '#66ff99', '#33ff77'];
+    const xoSymbols = ['✖️', '⭕', 'XO', '✖️⭕'];
+    
+    // Create XO drops
+    const interval = setInterval(() => {
+      createXODrop(container, colors, xoSymbols);
+    }, 100);
 
-    const placed = [];
-
-    for (let i = 0; i < REQUIRED_WINDOWS; i++){
-      const windowLight = document.createElement("div");
-      windowLight.classList.add("window-light");
-
-      const pos = pickNonOverlappingWindowPos(placed);
-      placed.push(pos);
-
-      windowLight.style.left = pos.x + "%";
-      windowLight.style.top  = pos.y + "%";
-
-      windowLight.addEventListener("click", (e) => {
-        if (unlocked || windowLight.classList.contains("lit")) return;
-
-        const rect = container.getBoundingClientRect();
-        lastTap.x = ((e.clientX - rect.left) / rect.width) * 100;
-        lastTap.y = ((e.clientY - rect.top) / rect.height) * 100;
-
-        windowLight.classList.add("lit");
-        litCount++;
-
-        if (litCount >= REQUIRED_WINDOWS){
-          unlockCity();
-        }
-      });
-
-      container.appendChild(windowLight);
-    }
-
-    requestAnimationFrame(() => container.classList.add("game-ready"));
-  }
-
-  function pickNonOverlappingWindowPos(placed){
-    const minDist = 6.5;
-    let tries = 0;
-
-    while (tries < 250){
-      tries++;
-
-      const zone = BUILDING_ZONES[Math.floor(Math.random() * BUILDING_ZONES.length)];
-      const x = rand(zone.xMin, zone.xMax);
-      const y = rand(zone.yMin, zone.yMax);
-
-      const ok = placed.every(p => distPct(p.x, p.y, x, y) >= minDist);
-      if (ok) return { x, y };
-    }
-
-    return { x: rand(10, 90), y: rand(40, 80) };
-  }
-
-  function rand(min, max){
-    return Math.random() * (max - min) + min;
-  }
-
-  function distPct(x1, y1, x2, y2){
-    const dx = x1 - x2;
-    const dy = y1 - y2;
-    return Math.sqrt(dx*dx + dy*dy);
-  }
-
-  function unlockCity(){
-    unlocked = true;
-
-    const city = document.getElementById("cityContainer");
-    const flood = document.getElementById("neonFlood");
-    if (!city || !flood) return;
-
-    city.classList.add("emerald");
-    createEmeraldRipple(city, lastTap.x, lastTap.y);
-
+    // Stop after 3 seconds
     setTimeout(() => {
-      city.classList.add("zooming");
-    }, 420);
-
-    setTimeout(() => {
-      flood.style.setProperty("--origin-x", lastTap.x + "%");
-      flood.style.setProperty("--origin-y", lastTap.y + "%");
-      flood.style.setProperty("--center-x", lastTap.x + "%");
-      flood.style.setProperty("--center-y", lastTap.y + "%");
-
-      flood.classList.remove("flooding");
-      void flood.offsetWidth;
-      flood.classList.add("flooding");
-    }, 720);
-
-    setTimeout(() => {
-      document.body.classList.remove("locked");
-      document.body.classList.add("scroll-mode");
-
-      flood.classList.remove("flooding");
-      flood.style.opacity = "0";
-      city.classList.remove("zooming");
-
-      document.getElementById("page2")?.scrollIntoView({behavior:"smooth"});
-    }, 1450);
+      clearInterval(interval);
+      
+      // Fade out and transition to page 2
+      setTimeout(() => {
+        container.style.opacity = '0';
+        container.style.transition = 'opacity 1s ease';
+        
+        setTimeout(() => {
+          container.classList.remove('active');
+          container.style.opacity = '1';
+          container.innerHTML = '';
+          
+          // Unlock and scroll to page 2
+          document.body.classList.remove("locked");
+          document.body.classList.add("scroll-mode");
+          document.getElementById("page2")?.scrollIntoView({behavior:"smooth"});
+        }, 1000);
+      }, 500);
+    }, 3000);
   }
 
-  function createEmeraldRipple(container, xPct, yPct){
-    const ripple = document.createElement("div");
-    ripple.className = "emerald-ripple";
-    ripple.style.left = xPct + "%";
-    ripple.style.top = yPct + "%";
-
-    container.appendChild(ripple);
-    void ripple.offsetWidth;
-    ripple.classList.add("go");
-
-    setTimeout(() => ripple.remove(), 900);
+  function createXODrop(container, colors, symbols) {
+    const drop = document.createElement('div');
+    drop.className = 'xo-drop';
+    
+    // Random properties
+    const left = Math.random() * 100;
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+    const size = 0.8 + Math.random() * 1.5;
+    const duration = 2 + Math.random() * 2;
+    const delay = Math.random() * 0.5;
+    
+    drop.style.left = `${left}%`;
+    drop.style.color = color;
+    drop.style.fontSize = `${size}rem`;
+    drop.style.animationDuration = `${duration}s`;
+    drop.style.animationDelay = `${delay}s`;
+    drop.textContent = symbol;
+    
+    container.appendChild(drop);
+    
+    // Remove after animation
+    setTimeout(() => {
+      drop.remove();
+    }, (duration + delay) * 1000);
   }
 
   /* ===========================
@@ -201,10 +317,10 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const SONG_BLURB = {
-    "kissland-quiz": "You’re the main character. Dark glam, neon heart, fearless energy.",
+    "kissland-quiz": "You're the main character. Dark glam, neon heart, fearless energy.",
     "adaptation": "Soft on the outside, deep on the inside. You feel everything.",
     "professional": "Luxury vibe. Calm, composed… but you know your power.",
-    "belong-to-the-world": "Mysterious magnetism. You don’t chase — you attract.",
+    "belong-to-the-world": "Mysterious magnetism. You don't chase — you attract.",
     "wanderlust": "Free spirit energy. Fun, flirty, and always down for an adventure.",
   };
 
@@ -262,7 +378,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.classList.add("quiz-open");
     quizScreen?.setAttribute("aria-hidden", "false");
 
-    // snap to top (so the quiz always starts clean)
     setTimeout(() => {
       if (quizScreen) quizScreen.scrollTop = 0;
       window.scrollTo({ top: 0, behavior: "auto" });
@@ -274,7 +389,6 @@ document.addEventListener("DOMContentLoaded", () => {
     quizScreen?.setAttribute("aria-hidden", "true");
     stopResultAudio();
 
-    // go back to where they were on the invite
     setTimeout(() => {
       window.scrollTo({ top: _scrollYBeforeQuiz, behavior: "auto" });
     }, 0);
@@ -309,7 +423,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function playResultSong(songKey) {
-    // Ensure invite music stays stopped while result plays
     music?.pause();
 
     if (resultCover) {
@@ -347,17 +460,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     playResultSong(songKey);
 
-    // Change 5: auto-scroll so the FULL reveal is visible (heading + image + blurb + buttons)
     const scrollToFullResult = () => {
-      // first scroll the result card to top of view
       quizResult.scrollIntoView({ behavior: "smooth", block: "start" });
 
-      // then nudge down a bit so the image + buttons are visible nicely
       setTimeout(() => {
         window.scrollBy({ top: 140, left: 0, behavior: "smooth" });
       }, 350);
 
-      // and one more small nudge in case the image loads late
       setTimeout(() => {
         window.scrollBy({ top: 80, left: 0, behavior: "smooth" });
       }, 900);
