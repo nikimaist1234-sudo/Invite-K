@@ -18,7 +18,7 @@ html, body {
   left: 0;
   width: 100%;
   min-height: 100vh;
-  padding: 40px;
+  padding: 20px;
 
   display: flex;
   justify-content: center;
@@ -80,7 +80,6 @@ body.scroll-mode #page4{
 }
 
 /* ---------------- PAGE 0 (Volume) ---------------- */
-/* Change 1: weeknd-music.jpg -> background.jpg */
 .volume-page {
   background: url("background.jpg") no-repeat center center/cover;
   color: white;
@@ -91,29 +90,232 @@ body.scroll-mode #page4{
   opacity: 0.95;
 }
 
-/* ---------------- PAGE 1 ---------------- */
+/* ---------------- PAGE 1 (Memory Game) ---------------- */
 #page1 {
   background: url("weeknd-bg.jpg") no-repeat center center/cover;
   color: white;
 }
 
-.overlay {
-  background: rgba(0,0,0,0.6);
-  padding: 40px;
+.game-overlay {
+  background: rgba(0,0,0,0.75);
+  padding: 20px;
   border-radius: 15px;
   text-align: center;
-  width: min(720px, 92vw);
+  width: min(400px, 95vw);
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .big-title {
-  font-size: 5rem;
-  margin-bottom: 10px;
+  font-size: 2.5rem;
+  margin-bottom: 5px;
 }
 
-/* Change 3: make this slightly bigger */
 .invite-subtitle{
-  font-size: 1.55rem;
+  font-size: 1.2rem;
   margin-top: 2px;
+  margin-bottom: 15px;
+  opacity: 0.9;
+}
+
+/* ---------------- MEMORY GAME ---------------- */
+.memory-game-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.game-hint {
+  font-size: 0.95rem;
+  color: #aaffcc;
+  text-shadow: 0 0 10px rgba(0,255,127,0.5);
+  margin-bottom: 5px;
+}
+
+.lyric-reveal {
+  min-height: 30px;
+  font-size: 1.1rem;
+  color: #00ff7f;
+  text-shadow: 0 0 15px rgba(0,255,127,0.8);
+  font-weight: bold;
+  letter-spacing: 1px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 10px;
+  width: 100%;
+}
+
+.lyric-word {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.5s ease;
+}
+
+.lyric-word.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.memory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 10px;
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 2/1;
+}
+
+.memory-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  cursor: pointer;
+  perspective: 1000px;
+}
+
+.memory-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+  border-radius: 10px;
+}
+
+.memory-card.flipped .memory-card-inner {
+  transform: rotateY(180deg);
+}
+
+.memory-card.matched .memory-card-inner {
+  transform: rotateY(180deg);
+}
+
+.memory-card.matched {
+  animation: matchPulse 0.6s ease;
+}
+
+@keyframes matchPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.memory-card-front,
+.memory-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.memory-card-front {
+  background: linear-gradient(135deg, rgba(0,255,127,0.2), rgba(0,200,100,0.1));
+  border: 2px solid rgba(0,255,127,0.4);
+  color: #00ff7f;
+  text-shadow: 0 0 10px rgba(0,255,127,0.8);
+}
+
+.memory-card-back {
+  background: linear-gradient(135deg, rgba(0,100,50,0.9), rgba(0,60,30,0.95));
+  border: 2px solid rgba(0,255,127,0.6);
+  transform: rotateY(180deg);
+  font-size: 2rem;
+}
+
+.card-symbol {
+  filter: drop-shadow(0 0 8px rgba(0,255,127,0.6));
+}
+
+.final-message {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 15px;
+  animation: fadeInUp 0.8s ease;
+}
+
+.final-message.show {
+  display: flex;
+}
+
+.final-text {
+  font-size: 1.5rem;
+  color: #00ff7f;
+  text-shadow: 0 0 20px rgba(0,255,127,1);
+  font-weight: bold;
+}
+
+.final-sub {
+  font-size: 0.9rem;
+  color: #aaffcc;
+  opacity: 0.8;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------------- XO RAIN ---------------- */
+.xo-rain-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: hidden;
+  display: none;
+}
+
+.xo-rain-container.active {
+  display: block;
+}
+
+.xo-drop {
+  position: absolute;
+  font-size: 1.5rem;
+  font-weight: bold;
+  animation: xoFall linear forwards;
+  text-shadow: 0 0 10px currentColor;
+}
+
+@keyframes xoFall {
+  0% {
+    transform: translateY(-50px) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
 }
 
 /* ---------------- BUTTONS ---------------- */
@@ -179,12 +381,11 @@ button.primary:hover{
   text-align: center;
   margin-top: 10px;
   opacity: 0.95;
-  font-weight: 800; /* Change 4: bold */
+  font-weight: 800;
   font-size: 18px;
   letter-spacing: 0.3px;
 }
 
-/* Dress Code slightly bigger */
 .dress-title{
   font-size: 1.65rem;
 }
@@ -195,7 +396,7 @@ button.primary:hover{
   border-radius: 14px;
   display: inline-block;
   margin: 12px 0 14px;
-  border: 1px solid rgba(0,0,0,0.55); /* Change 4: slight black outline */
+  border: 1px solid rgba(0,0,0,0.55);
 }
 
 .dress-list {
@@ -217,7 +418,6 @@ button.primary:hover{
   margin-bottom: 8px;
 }
 
-/* trilogy-like contact lines */
 .contact-lines{
   margin-top: 10px;
 }
@@ -273,216 +473,7 @@ button.primary:hover{
   margin-top: auto;
 }
 
-/* ================= CITYSCAPE GAME ================= */
-.city-area{
-  margin-top: 28px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 18px;
-}
-
-.city-hint{
-  font-size: 1.3rem;
-  color: #aaffcc;
-}
-
-.city-container{
-  position: relative;
-  width: min(640px, 95vw);
-  height: 380px;
-
-  /* Keep it consistent with your project files */
-  background: url("weeknd-bg.jpg") no-repeat center center/cover;
-
-  border-radius: 10px;
-  filter: blur(3.5px) brightness(0.7) contrast(1.08) saturate(1.05);
-  overflow: hidden;
-  transition: all 0.8s ease;
-}
-
-/* Skyline silhouette overlay */
-.city-container::before{
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-
-  background:
-    linear-gradient(to top, rgba(0,0,0,0.85) 0 35%, transparent 35%),
-    linear-gradient(to top, rgba(0,0,0,0.9) 0 60%, transparent 60%) 8% 100% / 10% 80% no-repeat,
-    linear-gradient(to top, rgba(0,0,0,0.9) 0 45%, transparent 45%) 22% 100% / 8% 65% no-repeat,
-    linear-gradient(to top, rgba(0,0,0,0.9) 0 70%, transparent 70%) 40% 100% / 14% 90% no-repeat,
-    linear-gradient(to top, rgba(0,0,0,0.9) 0 55%, transparent 55%) 60% 100% / 12% 75% no-repeat,
-    linear-gradient(to top, rgba(0,0,0,0.9) 0 65%, transparent 65%) 78% 100% / 9% 85% no-repeat;
-
-  opacity: 0.92;
-  mix-blend-mode: normal;
-  filter: drop-shadow(0 0 10px rgba(0,255,127,0.18));
-}
-
-/* subtle glow */
-.city-container::after{
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: radial-gradient(circle at center,
-    rgba(0,255,127,0.1),
-    transparent 70%);
-  animation: cityPulse 2.5s infinite ease-in-out;
-}
-
-@keyframes cityPulse{
-  0%{ opacity: 0.3; }
-  50%{ opacity: 0.7; }
-  100%{ opacity: 0.3; }
-}
-
-.window-light{
-  position: absolute;
-  z-index: 3;
-  width: 26px;
-  height: 26px;
-  border-radius: 4px;
-  cursor: pointer;
-  user-select: none;
-
-  background: rgba(0,255,127,0.22);
-  border: 1px solid rgba(170,255,204,0.55);
-  box-shadow:
-    0 0 10px rgba(0,255,127,0.35),
-    0 0 22px rgba(0,255,127,0.22);
-
-  transition: transform 180ms ease, background 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
-  animation: windowPulse 1.7s ease-in-out infinite;
-}
-
-.city-container.game-ready .window-light{
-  box-shadow:
-    0 0 14px rgba(0,255,127,0.42),
-    0 0 30px rgba(0,255,127,0.26);
-}
-
-.window-light:hover{
-  transform: scale(1.08);
-  border-color: rgba(220,255,240,0.75);
-  box-shadow:
-    0 0 18px rgba(0,255,127,0.55),
-    0 0 42px rgba(0,255,127,0.28);
-}
-
-@keyframes windowPulse{
-  0%   { transform: scale(1);    opacity: 0.85; }
-  50%  { transform: scale(1.06); opacity: 1; }
-  100% { transform: scale(1);    opacity: 0.88; }
-}
-
-.window-light.lit{
-  background: #00ff7f;
-  box-shadow:
-    0 0 14px rgba(0,255,127,0.85),
-    0 0 32px rgba(0,255,127,0.65),
-    0 0 56px rgba(0,255,127,0.35);
-}
-
-.city-container.emerald{
-  filter: blur(0px) brightness(1);
-  box-shadow:
-    0 0 55px rgba(0,255,127,0.75),
-    0 0 110px rgba(0,255,127,0.55);
-}
-
-.city-container.zooming{
-  transition: transform 850ms ease, filter 850ms ease;
-  transform: scale(1.55);
-  filter: blur(1px) brightness(0.95);
-}
-
-/* Emerald ripple */
-.emerald-ripple{
-  position: absolute;
-  z-index: 4;
-  width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  transform: translate(-50%, -50%) scale(0.2);
-  opacity: 0;
-  pointer-events: none;
-  background: radial-gradient(circle,
-    rgba(0,255,127,0.6) 0%,
-    rgba(0,255,127,0.3) 35%,
-    rgba(0,255,127,0.0) 70%);
-}
-
-.emerald-ripple.go{
-  animation: emeraldRipple 820ms ease-out forwards;
-}
-
-@keyframes emeraldRipple{
-  0%{
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.25);
-  }
-  15%{
-    opacity: 1;
-  }
-  100%{
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(18);
-  }
-}
-
-/* ---------------- KISSLAND NEON FLOOD ---------------- */
-#neonFlood{
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 9998;
-
-  opacity: 0;
-
-  --origin-x: 50%;
-  --origin-y: 50%;
-  --center-x: 50%;
-  --center-y: 50%;
-
-  background: radial-gradient(circle at var(--center-x) var(--center-y),
-    rgba(0,255,127,0.95) 0%,
-    rgba(0,255,127,0.75) 18%,
-    rgba(0,255,127,0.25) 45%,
-    rgba(0,255,127,0.0) 70%);
-
-  transform-origin: var(--origin-x) var(--origin-y);
-  transform: scale(0.05);
-  filter: blur(6px);
-}
-
-#neonFlood.flooding{
-  animation: neonFloodSpread 1100ms ease-out forwards;
-}
-
-@keyframes neonFloodSpread{
-  0%{
-    opacity: 0;
-    transform: scale(0.05);
-    filter: blur(10px);
-  }
-  12%{ opacity: 1; }
-  70%{
-    opacity: 1;
-    transform: scale(2.8);
-    filter: blur(1px);
-  }
-  100%{
-    opacity: 0;
-    transform: scale(3.4);
-    filter: blur(0px);
-  }
-}
-
-/* ---------------- QUIZ (Trilogy-style overlay) ---------------- */
+/* ---------------- QUIZ ---------------- */
 body.quiz-open{
   overflow: hidden !important;
 }
@@ -706,23 +697,43 @@ body.quiz-open .quiz-screen{
 
 .quiz-play-btn:hover{ background: rgba(0,0,0,0.12); }
 
-/* ---------------- MOBILE ---------------- */
+/* ---------------- MOBILE OPTIMIZATIONS ---------------- */
 @media (max-width: 768px) {
   .page {
-    padding: 20px;
+    padding: 15px;
     min-height: 100vh;
   }
 
-  .overlay{
-    padding: 26px;
+  .game-overlay {
+    padding: 15px;
+    width: min(350px, 95vw);
   }
 
   .big-title {
-    font-size: 2.4rem;
+    font-size: 2rem;
   }
 
   .invite-subtitle{
-    font-size: 1.25rem;
+    font-size: 1rem;
+  }
+
+  .memory-grid {
+    gap: 8px;
+    max-width: 320px;
+  }
+
+  .memory-card-front,
+  .memory-card-back {
+    font-size: 1.4rem;
+  }
+
+  .memory-card-back {
+    font-size: 1.6rem;
+  }
+
+  .lyric-reveal {
+    font-size: 0.9rem;
+    min-height: 25px;
   }
 
   .two-column {
@@ -735,13 +746,24 @@ body.quiz-open .quiz-screen{
     width: 100%;
   }
 
-  .city-container{
-    height: 340px;
-  }
-
   .quiz-title{ font-size: 22px; }
   .quiz-q{ padding: 14px; }
   .quiz-q label{ padding: 10px; }
+}
+
+@media (max-width: 380px) {
+  .memory-grid {
+    max-width: 280px;
+  }
+
+  .memory-card-front,
+  .memory-card-back {
+    font-size: 1.2rem;
+  }
+
+  .memory-card-back {
+    font-size: 1.4rem;
+  }
 }
 
 @media (max-width: 480px){
