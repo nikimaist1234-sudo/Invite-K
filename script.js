@@ -1,15 +1,18 @@
+/* ===========================
+   XO Nights Invite + Quiz (Kissland Version)
+   =========================== */
+
 document.addEventListener("DOMContentLoaded", () => {
+  /* ---------- Elements ---------- */
   const startBtn = document.getElementById("startBtn");
+  const memoryGrid = document.getElementById("memoryGrid");
+  const lyricReveal = document.getElementById("lyricReveal");
+  const finalMessage = document.getElementById("finalMessage");
   const music = document.getElementById("bgMusic");
 
-  // Memory Game Variables
-  let hasFlippedCard = false;
-  let lockBoard = false;
-  let firstCard, secondCard;
-  let matchedPairs = 0;
-  const totalPairs = 4;
-  let gameComplete = false;
-
+  /* ---------- Memory Game Config ---------- */
+  const TOTAL_PAIRS = 4;
+  
   // Card symbols (emojis representing the themes)
   const cardSymbols = [
     { id: 1, symbol: '🐱', name: 'neon-cat', lyric: 'Adapted' },
@@ -22,7 +25,51 @@ document.addEventListener("DOMContentLoaded", () => {
     { id: 8, symbol: '✖️⭕', name: 'xo', lyric: 'models' }
   ];
 
-  // Shuffle array
+  // XO rain config - Green shades for Kissland
+  const XO_RAIN_DURATION_MS = 5000;
+  const XO_COLORS = ["#00ff7f", "#00cc66", "#00994d", "#66ff99", "#33ff77"];
+
+  let hasFlippedCard = false;
+  let lockBoard = false;
+  let firstCard, secondCard;
+  let matchedPairs = 0;
+  let gameComplete = false;
+  let musicStarted = false;
+  let finishing = false;
+
+  // Prevent touch scrolling while locked (mobile)
+  function preventScroll(e) {
+    if (document.body.classList.contains("locked")) {
+      e.preventDefault();
+    }
+  }
+  window.addEventListener("touchmove", preventScroll, { passive: false });
+
+  /* ---------- Page nav ---------- */
+  function showOnlyPage(pageNumber) {
+    document.querySelectorAll(".page").forEach((p) => p.classList.remove("active"));
+    const el = document.getElementById("page" + pageNumber);
+    if (el) el.classList.add("active");
+  }
+
+  /* ---------- Music ---------- */
+  function startMusic() {
+    if (musicStarted || !music) return;
+
+    music.volume = 0;
+    music.play().catch(() => {});
+    musicStarted = true;
+
+    const fade = setInterval(() => {
+      if (music.volume < 0.6) {
+        music.volume = Math.min(0.6, music.volume + 0.05);
+      } else {
+        clearInterval(fade);
+      }
+    }, 180);
+  }
+
+  /* ---------- Shuffle ---------- */
   function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -31,39 +78,9 @@ document.addEventListener("DOMContentLoaded", () => {
     return array;
   }
 
-  function showOnlyPage(pageNumber){
-    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-    const el = document.getElementById("page" + pageNumber);
-    if (el) el.classList.add("active");
-  }
-
-  function startMusic(){
-    if (!music) return;
-    music.volume = 0;
-    music.play().catch(()=>{});
-    const fade = setInterval(() => {
-      if (music.volume < 0.7){
-        music.volume = Math.min(0.7, music.volume + 0.05);
-      } else {
-        clearInterval(fade);
-      }
-    }, 150);
-  }
-
-  startBtn?.addEventListener("click", () => {
-    showOnlyPage(1);
-    startMusic();
-    initMemoryGame();
-  });
-
-  /* ================= MEMORY MATCH GAME ================= */
-
+  /* ---------- Memory Game ---------- */
   function initMemoryGame() {
-    const grid = document.getElementById('memoryGrid');
-    const lyricReveal = document.getElementById('lyricReveal');
-    const finalMessage = document.getElementById('finalMessage');
-    
-    if (!grid) return;
+    if (!memoryGrid) return;
 
     // Reset game state
     hasFlippedCard = false;
@@ -72,9 +89,10 @@ document.addEventListener("DOMContentLoaded", () => {
     secondCard = null;
     matchedPairs = 0;
     gameComplete = false;
+    finishing = false;
 
     // Clear grid and lyric reveal
-    grid.innerHTML = '';
+    memoryGrid.innerHTML = '';
     lyricReveal.innerHTML = '';
     finalMessage.classList.remove('show');
 
@@ -91,24 +109,22 @@ document.addEventListener("DOMContentLoaded", () => {
     // Shuffle and create cards
     const shuffledCards = shuffle([...cardSymbols]);
     
-    shuffledCards.forEach((cardData, index) => {
-      const card = createCard(cardData, index);
-      grid.appendChild(card);
+    shuffledCards.forEach((cardData) => {
+      const card = createCard(cardData);
+      memoryGrid.appendChild(card);
     });
   }
 
-  function createCard(cardData, index) {
+  function createCard(cardData) {
     const card = document.createElement('div');
     card.className = 'memory-card';
-    card.dataset.symbol = cardData.symbol;
     card.dataset.name = cardData.name;
     card.dataset.lyric = cardData.lyric;
-    card.dataset.id = cardData.id;
 
     card.innerHTML = `
       <div class="memory-card-inner">
         <div class="memory-card-front">
-          <span class="card-symbol">✖️⭕</span>
+          <span class="card-symbol">💚</span>
         </div>
         <div class="memory-card-back">
           <span class="card-symbol">${cardData.symbol}</span>
@@ -129,13 +145,11 @@ document.addEventListener("DOMContentLoaded", () => {
     this.classList.add('flipped');
 
     if (!hasFlippedCard) {
-      // First card flipped
       hasFlippedCard = true;
       firstCard = this;
       return;
     }
 
-    // Second card flipped
     secondCard = this;
     checkForMatch();
   }
@@ -164,7 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
       resetBoard();
 
-      if (matchedPairs === totalPairs) {
+      if (matchedPairs === TOTAL_PAIRS) {
         setTimeout(() => {
           completeGame();
         }, 800);
@@ -204,83 +218,116 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function completeGame() {
     gameComplete = true;
+    finishing = true;
     
     // Show final message
-    const finalMessage = document.getElementById('finalMessage');
     finalMessage.classList.add('show');
 
     // Start XO rain after a short delay
     setTimeout(() => {
-      startXORain();
+      startXORain(XO_RAIN_DURATION_MS);
     }, 1000);
   }
 
-  function startXORain() {
-    const container = document.getElementById('xoRainContainer');
-    if (!container) return;
+  /* ---------- XO Rain (Green Shades for Kissland) ---------- */
+  function startXORain(durationMs) {
+    const page1 = document.getElementById("page1");
 
-    container.classList.add('active');
-    
-    const colors = ['#00ff7f', '#00cc66', '#00994d', '#66ff99', '#33ff77'];
-    const xoSymbols = ['✖️', '⭕', 'XO', '✖️⭕'];
-    
-    // Create XO drops
-    const interval = setInterval(() => {
-      createXODrop(container, colors, xoSymbols);
-    }, 100);
+    let layer = document.getElementById("xoRainLayer");
+    if (!layer) {
+      layer = document.createElement("div");
+      layer.id = "xoRainLayer";
+      document.body.appendChild(layer);
+    }
 
-    // Stop after 3 seconds
-    setTimeout(() => {
-      clearInterval(interval);
-      
-      // Fade out and transition to page 2
-      setTimeout(() => {
-        container.style.opacity = '0';
-        container.style.transition = 'opacity 1s ease';
-        
+    const start = Date.now();
+
+    const spawn = () => {
+      const burst = rand(10, 18);
+      for (let i = 0; i < burst; i++) {
+        const piece = document.createElement("div");
+        piece.className = "xo-piece";
+        piece.textContent = "XO";
+
+        const left = rand(0, window.innerWidth);
+        const duration = rand(1800, 3200);
+        const drift = rand(-140, 140) + "px";
+        const rot = rand(-540, 540) + "deg";
+
+        piece.style.left = left + "px";
+        piece.style.animationDuration = duration + "ms";
+        piece.style.color = XO_COLORS[rand(0, XO_COLORS.length - 1)];
+        piece.style.setProperty("--drift", drift);
+        piece.style.setProperty("--rot", rot);
+
+        layer.appendChild(piece);
+        setTimeout(() => piece.remove(), duration + 150);
+      }
+    };
+
+    // Start raining immediately
+    spawn();
+    const rainTimer = setInterval(() => {
+      spawn();
+      if (Date.now() - start >= durationMs) {
+        clearInterval(rainTimer);
+
+        // Fade page1 out, then reveal scroll invite
+        if (page1) page1.classList.add("fade-out");
+
         setTimeout(() => {
-          container.classList.remove('active');
-          container.style.opacity = '1';
-          container.innerHTML = '';
-          
-          // Unlock and scroll to page 2
-          document.body.classList.remove("locked");
-          document.body.classList.add("scroll-mode");
-          document.getElementById("page2")?.scrollIntoView({behavior:"smooth"});
-        }, 1000);
-      }, 500);
-    }, 3000);
+          cleanupXORain();
+          finishGame();
+        }, 850);
+      }
+    }, 140);
   }
 
-  function createXODrop(container, colors, symbols) {
-    const drop = document.createElement('div');
-    drop.className = 'xo-drop';
-    
-    // Random properties
-    const left = Math.random() * 100;
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    const symbol = symbols[Math.floor(Math.random() * symbols.length)];
-    const size = 0.8 + Math.random() * 1.5;
-    const duration = 2 + Math.random() * 2;
-    const delay = Math.random() * 0.5;
-    
-    drop.style.left = `${left}%`;
-    drop.style.color = color;
-    drop.style.fontSize = `${size}rem`;
-    drop.style.animationDuration = `${duration}s`;
-    drop.style.animationDelay = `${delay}s`;
-    drop.textContent = symbol;
-    
-    container.appendChild(drop);
-    
-    // Remove after animation
+  function cleanupXORain() {
+    const layer = document.getElementById("xoRainLayer");
+    if (layer) layer.remove();
+  }
+
+  /* ---------- Unlock scrolling after game ---------- */
+  function finishGame() {
+    document.body.classList.remove("locked");
+    document.body.classList.add("scroll-mode");
+
+    const page2 = document.getElementById("page2");
     setTimeout(() => {
-      drop.remove();
-    }, (duration + delay) * 1000);
+      page2?.scrollIntoView({ behavior: "smooth" });
+    }, 350);
+  }
+
+  /* ---------- Helpers ---------- */
+  function rand(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  /* ---------- Start button ---------- */
+  function startExperience() {
+    showOnlyPage(1);
+    startMusic();
+    initMemoryGame();
+  }
+
+  // Mobile-proof start
+  if (startBtn) {
+    let started = false;
+    const onceStart = (e) => {
+      if (started) return;
+      started = true;
+      e?.preventDefault?.();
+      startExperience();
+    };
+
+    startBtn.addEventListener("pointerup", onceStart, { passive: false });
+    startBtn.addEventListener("touchend", onceStart, { passive: false });
+    startBtn.addEventListener("click", onceStart);
   }
 
   /* ===========================
-     QUIZ (KISSLAND)
+     QUIZ (Kissland)
      =========================== */
 
   const openQuizBtn = document.getElementById("openQuizBtn");
@@ -301,7 +348,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const resultAudio = document.getElementById("resultAudio");
 
   const SONG_KEYS = [
-    "kissland-quiz",
+    "kissland",
     "adaptation",
     "professional",
     "belong-to-the-world",
@@ -309,7 +356,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   const SONG_PRETTY = {
-    "kissland-quiz": "Kiss Land",
+    "kissland": "Kiss Land",
     "adaptation": "Adaptation",
     "professional": "Professional",
     "belong-to-the-world": "Belong To The World",
@@ -317,7 +364,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const SONG_BLURB = {
-    "kissland-quiz": "You're the main character. Dark glam, neon heart, fearless energy.",
+    "kissland": "You're the main character. Dark glam, neon heart, fearless energy.",
     "adaptation": "Soft on the outside, deep on the inside. You feel everything.",
     "professional": "Luxury vibe. Calm, composed… but you know your power.",
     "belong-to-the-world": "Mysterious magnetism. You don't chase — you attract.",
@@ -349,7 +396,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!music) return;
     if (_inviteWasPlaying) {
-      try { music.currentTime = _inviteTime || 0; } catch (e) {}
+      try {
+        music.currentTime = _inviteTime || 0;
+      } catch (e) {}
       music.play().catch(() => {});
     }
   }
@@ -408,7 +457,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!data.get("q" + i)) return { error: "Answer all 6 questions first." };
     }
 
-    const scores = Object.fromEntries(SONG_KEYS.map(k => [k, 0]));
+    const scores = Object.fromEntries(SONG_KEYS.map((k) => [k, 0]));
 
     for (const [key, value] of data.entries()) {
       if (key === "guestName") continue;
@@ -416,7 +465,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const max = Math.max(...Object.values(scores));
-    const top = Object.keys(scores).filter(k => scores[k] === max);
+    const top = Object.keys(scores).filter((k) => scores[k] === max);
     const chosen = top[Math.floor(Math.random() * top.length)];
 
     return { chosen, guestName };
@@ -462,20 +511,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const scrollToFullResult = () => {
       quizResult.scrollIntoView({ behavior: "smooth", block: "start" });
-
-      setTimeout(() => {
-        window.scrollBy({ top: 140, left: 0, behavior: "smooth" });
-      }, 350);
-
-      setTimeout(() => {
-        window.scrollBy({ top: 80, left: 0, behavior: "smooth" });
-      }, 900);
+      setTimeout(() => window.scrollBy({ top: -16, left: 0, behavior: "auto" }), 350);
     };
 
     setTimeout(scrollToFullResult, 180);
 
     if (resultCover) {
-      resultCover.onload = () => setTimeout(scrollToFullResult, 80);
+      resultCover.onload = () => {
+        setTimeout(scrollToFullResult, 60);
+      };
     }
   }
 
@@ -485,7 +529,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   quizRetryBtn?.addEventListener("click", () => {
     resetQuizUI();
-    stopResultAudio();
     if (quizScreen) quizScreen.scrollTop = 0;
   });
 
