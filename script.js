@@ -348,7 +348,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const resultAudio = document.getElementById("resultAudio");
 
   const SONG_KEYS = [
-    "kissland",
+    "kissland-quiz",
     "adaptation",
     "professional",
     "belong-to-the-world",
@@ -356,7 +356,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   const SONG_PRETTY = {
-    "kissland": "Kiss Land",
+    "kissland-quiz": "Kiss Land",
     "adaptation": "Adaptation",
     "professional": "Professional",
     "belong-to-the-world": "Belong To The World",
@@ -364,7 +364,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const SONG_BLURB = {
-    "kissland": "You're the main character. Dark glam, neon heart, fearless energy.",
+    "kissland-quiz": "You're the main character. Dark glam, neon heart, fearless energy.",
     "adaptation": "Soft on the outside, deep on the inside. You feel everything.",
     "professional": "Luxury vibe. Calm, composed… but you know your power.",
     "belong-to-the-world": "Mysterious magnetism. You don't chase — you attract.",
